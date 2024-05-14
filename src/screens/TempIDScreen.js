@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useLayoutEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ScrollView,
   RefreshControl,
@@ -9,10 +9,12 @@ import {
 } from 'react-native';
 import {Text, Button, Card} from '@rneui/themed';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useSelector, useDispatch} from 'react-redux';
+import {useSelector} from 'react-redux';
 import Toast from 'react-native-toast-message';
 import api from '../services/api';
 import {Linking, Share} from 'react-native';
+import LoadingIndicator from '../components/LoadingIndicator';
+import {COLOR_LITE, THEME_COLOR, THEME_COLOR_2} from '../assets/colors/colors';
 
 const TempIDScreen = ({route, navigation}) => {
   const {tempId} = route.params;
@@ -21,13 +23,13 @@ const TempIDScreen = ({route, navigation}) => {
   const [status, setStatus] = useState('');
 
   const token = useSelector(state => state.userInfo.token);
+
   useEffect(() => {
     fetchTempDetails();
   }, [tempId, token]);
+
   const sendWhatsAppMessage = async () => {
-    const phoneNumber = '+91' + tempDetails.phoneNumber; // Example phone number
-    const tempId = tempDetails.id;
-    console.log(tempDetails.id);
+    const phoneNumber = '+91' + tempDetails.phoneNumber;
     const formUrl = `https://ownerdekhle.com/form/${tempId}`;
     const url = `whatsapp://send?phone=${phoneNumber}&text=Please complete the form: ${formUrl}`;
     try {
@@ -52,7 +54,7 @@ const TempIDScreen = ({route, navigation}) => {
   const shareLink = async () => {
     try {
       await Share.share({
-        message: `http://ownerdekhle.com/form/${tempId}`,
+        message: `https://ownerdekhle.com/form/${tempId}`,
       });
     } catch (error) {
       Toast.show({
@@ -79,8 +81,6 @@ const TempIDScreen = ({route, navigation}) => {
   };
 
   const completeAction = async () => {
-    // Implement the complete action
-    console.log('Completing Action');
     const body = {
       tempId,
     };
@@ -90,13 +90,13 @@ const TempIDScreen = ({route, navigation}) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data);
       if (response.data.success) {
         Toast.show({
           type: 'info',
           text1: 'COMPLETED QR',
           text2: 'COMPLETED QR',
         });
+        fetchTempDetails();
       } else {
         Toast.show({
           type: 'error',
@@ -104,23 +104,16 @@ const TempIDScreen = ({route, navigation}) => {
         });
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.status === 400) {
-        Toast.show({
-          type: 'error',
-          text1: 'Failed to Create this',
-          text2: error.response.data.message,
-        });
-        Toast.show({
-          type: 'error',
-          text1: 'Failed to create TempID',
-        });
-      }
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to Create this',
+        text2: error.response.data.message,
+      });
       fetchTempDetails();
     }
   };
 
-  const cancelAction = () => {
+  const cancelAction = async () => {
     // Implement the cancel action
     console.log('Cancelling Action');
     fetchTempDetails();
@@ -153,20 +146,10 @@ const TempIDScreen = ({route, navigation}) => {
     }
   };
 
-  const getStatusOptions = () => {
-    switch (status) {
-      case 'PENDING':
-        return [{label: 'CANCELLED', value: 'CANCELLED'}];
-      case 'SUBMITTED':
-        return [
-          {label: 'CANCELLED', value: 'CANCELLED'},
-          {label: 'COMPLETED', value: 'COMPLETED'},
-        ];
-      default:
-        return [];
-    }
-  };
-
+  if (loading) {
+    return <LoadingIndicator />;
+  }
+  console.log(tempDetails);
   return (
     <ScrollView
       style={styles.container}
@@ -174,17 +157,26 @@ const TempIDScreen = ({route, navigation}) => {
         <RefreshControl refreshing={loading} onRefresh={fetchTempDetails} />
       }>
       {tempDetails ? (
-        <Card>
+        <Card containerStyle={styles.card}>
           <Card.Title style={styles.cardTitle}>Temp ID Details</Card.Title>
           <Card.Divider />
           <Text style={styles.infoText}>Temp ID: {tempDetails.id}</Text>
           <Text style={styles.infoText}>
             Phone Number: {tempDetails.phoneNumber}
           </Text>
-          <Text style={styles.infoText}>Status: {tempDetails.status}</Text>
+          <Text style={styles.infoText}>
+            Vehicle Type: {tempDetails.vehicleType}
+          </Text>
+          <Text
+            style={[
+              styles.status,
+              {color: getStatusColor(tempDetails.status)},
+            ]}>
+            Status: {tempDetails.status}
+          </Text>
           {status === 'SUBMITTED' && (
             <Button
-              buttonStyle={{backgroundColor: 'green'}} // Style for COMPLETE button
+              buttonStyle={styles.completeButton}
               icon={<Icon name="check" size={20} color="white" />}
               title=" COMPLETE"
               onPress={() => confirmAction('COMPLETE')}
@@ -192,7 +184,7 @@ const TempIDScreen = ({route, navigation}) => {
           )}
           {(status === 'SUBMITTED' || status === 'PENDING') && (
             <Button
-              buttonStyle={{backgroundColor: 'red', marginBottom: 10}} // Style for CANCEL button
+              buttonStyle={styles.cancelButton}
               icon={<Icon name="cancel" size={20} color="white" />}
               title=" CANCEL"
               onPress={() => confirmAction('CANCEL')}
@@ -201,41 +193,48 @@ const TempIDScreen = ({route, navigation}) => {
           <Button
             icon={<Icon name="message" size={20} color="white" />}
             title=" Share via WhatsApp"
-            buttonStyle={{backgroundColor: 'teal', marginBottom: 10}}
+            buttonStyle={styles.whatsappButton}
             onPress={sendWhatsAppMessage}
           />
-
           <Button
             icon={<Icon name="share" size={20} color="white" />}
             title=" Share Link"
-            buttonStyle={{backgroundColor: 'darkblue', marginBottom: 10}}
+            buttonStyle={styles.shareButton}
             onPress={shareLink}
           />
           <Button
             icon={<Icon name="refresh" size={20} color="white" />}
             title=" Refresh"
+            buttonStyle={styles.refreshButton}
             onPress={fetchTempDetails}
           />
         </Card>
       ) : (
-        <Text style={styles.loadingText}>Loading or no data available...</Text>
+        <Text style={styles.loadingText}>No data available...</Text>
       )}
     </ScrollView>
   );
 };
 
-// Continue with the existing styles...
-
-export default TempIDScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    backgroundColor: '#F0F8FF', // Alice Blue background for a light theme
+  },
+  card: {
+    borderRadius: 12,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
+    elevation: 6,
   },
   cardTitle: {
     fontSize: 20,
     color: '#333',
+    marginBottom: 10,
   },
   infoText: {
     marginBottom: 10,
@@ -247,28 +246,48 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
-});
-
-const pickerSelectStyles = {
-  inputIOS: {
+  completeButton: {
+    backgroundColor: '#32CD32', // Lime Green for COMPLETE button
+    marginBottom: 10,
+  },
+  cancelButton: {
+    backgroundColor: '#FF6347', // Tomato for CANCEL button
+    marginBottom: 10,
+  },
+  whatsappButton: {
+    backgroundColor: '#25D366', // WhatsApp green
+    marginBottom: 10,
+  },
+  shareButton: {
+    backgroundColor: THEME_COLOR, // Dodger Blue for share button
+    marginBottom: 10,
+  },
+  refreshButton: {
+    backgroundColor: THEME_COLOR_2, // Steel Blue for refresh button
+  },
+  status: {
     fontSize: 16,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: 'gray',
+    color: '#FFFFFF', // White text color for better contrast on colored backgrounds
+    padding: 8,
     borderRadius: 4,
-    color: 'black',
-    paddingRight: 30, // to ensure the text is never behind the icon
-    backgroundColor: 'white',
+    overflow: 'hidden', // Ensures the background color does not leak outside the border radius
+    // marginBottom: 5,
+    textAlign: 'right', // Centers the text within the status label
+    fontWeight: 'bold',
   },
-  inputAndroid: {
-    fontSize: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 0.5,
-    borderColor: 'gray',
-    borderRadius: 8,
-    color: 'black',
-    paddingRight: 30, // to ensure the text is never behind the icon
-    backgroundColor: 'white',
-  },
+});
+const getStatusColor = status => {
+  switch (status.toUpperCase()) {
+    case 'PENDING':
+      return '#FF8C00'; // Dark Orange
+    case 'SUBMITTED':
+      return '#104E8B'; // Dark Dodger Blue
+    case 'COMPLETED':
+      return '#228B22'; // Forest Green
+    case 'CANCELLED':
+      return '#B22222'; // Firebrick
+    default:
+      return '#333333'; // Default dark gray
+  }
 };
+export default TempIDScreen;

@@ -3,6 +3,7 @@ import {View, StyleSheet, ActivityIndicator, TextInput} from 'react-native';
 import TempIdList from '../container/CreateQR/TempIdList';
 import {useSelector} from 'react-redux';
 import api from '../services/api';
+import {THEME_COLOR} from '../assets/colors/colors';
 
 const TempIDListScreen = () => {
   const [tempIds, setTempIds] = useState([]);
@@ -68,9 +69,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    backgroundColor: THEME_COLOR,
   },
   searchContainer: {
-    padding: 10,
+    margin: 10,
+    backgroundColor: 'white',
   },
   searchInput: {
     height: 40,

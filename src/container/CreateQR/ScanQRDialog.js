@@ -1,14 +1,13 @@
 import React, {useState} from 'react';
 import {Modal, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
+import {THEME_COLOR} from '../../assets/colors/colors';
 
 const ScanQRDialog = ({isVisible, onClose, onCodeScanned}) => {
   // const [modalVisible, setModalVisible] = useState(false);
-  const [scannedCodes, setScannedCodes] = useState([]);
 
   const handleScan = e => {
     onCodeScanned(e.data);
-    // setModalVisible(false); // Close modal after scan
     console.log('Scanned QR Code:', e.data);
   };
 
@@ -35,14 +34,6 @@ const ScanQRDialog = ({isVisible, onClose, onCodeScanned}) => {
           }
         />
       </Modal>
-
-      <View style={styles.codesList}>
-        {scannedCodes.map((code, index) => (
-          <Text key={index} style={styles.codeText}>
-            Scanned Code: {code}
-          </Text>
-        ))}
-      </View>
     </View>
   );
 };
@@ -56,7 +47,7 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 10,
-    backgroundColor: '#007bff',
+    backgroundColor: THEME_COLOR,
     borderRadius: 5,
   },
   buttonText: {

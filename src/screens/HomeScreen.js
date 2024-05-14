@@ -5,6 +5,8 @@ import Toast from 'react-native-toast-message';
 import {useDispatch} from 'react-redux';
 import {clearUserInfo} from '../store/actions';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Importing Icon
+import {THEME_COLOR, THEME_COLOR_2} from '../assets/colors/colors';
+import {Image} from '@rneui/base';
 
 const HomeScreen = ({navigation}) => {
   const dispatch = useDispatch();
@@ -28,9 +30,15 @@ const HomeScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../assets/logo.png')} // Path to your local logo image
+          style={styles.logo}
+        />
+      </View>
       <View style={styles.row}>
         <IconButton
-          title="Scan QR"
+          title="Generate QR"
           iconName="qr-code-scanner"
           onPress={() => navigation.navigate('CreateQRScreen')}
         />
@@ -66,10 +74,11 @@ const HomeScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    // justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    paddingTop: 0,
+    backgroundColor: THEME_COLOR,
   },
   row: {
     flexDirection: 'row',
@@ -79,7 +88,7 @@ const styles = StyleSheet.create({
   },
   button: {
     // flexDirection: 'row',
-    backgroundColor: '#007bff',
+    backgroundColor: THEME_COLOR_2,
     padding: 10,
     alignItems: 'center',
     borderRadius: 5,
@@ -91,6 +100,16 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginLeft: 10,
     fontSize: 18,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 200,
+    height: 200,
+    alignSelf: 'center',
+    marginBottom: 20,
   },
 });
 

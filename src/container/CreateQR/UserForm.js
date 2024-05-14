@@ -6,27 +6,64 @@ import Toast from 'react-native-toast-message';
 import {useSelector} from 'react-redux';
 import api from '../../services/api';
 import {Picker} from '@react-native-picker/picker';
+import {COLOR_LITE, THEME_COLOR} from '../../assets/colors/colors';
 
 const UserForm = ({scannedCodes}) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
   const [vehicleType, setVehicleType] = useState('');
-  const navigation = useNavigation(); // Get navigation object using hook
-  const token = useSelector(state => state.userInfo.token); // Accessing token from Redux state
+  const navigation = useNavigation();
+  const token = useSelector(state => state.userInfo.token);
 
   console.log({vehicleType});
 
   const handleCreateTempId = async () => {
-    // Logic to create a temporary ID can be simulated here
-    const tempId = 'TID123'; // Example temporary ID
-    const status = 'Pending'; // Example status
-    console.log('Creating Temp ID with:', selectedOption, phoneNumber);
-    // Navigate to TempIDScreen with parameters
     const body = {
       phoneNumber: phoneNumber,
       QRIDS: scannedCodes,
       vehicleType: vehicleType,
     };
+    const digitOnly = /^[0-9]*$/;
+    if (!digitOnly.test(body.phoneNumber)) {
+      Toast.show({
+        type: 'error',
+        text1: 'Invalid Phone Number',
+        text2: 'Please Check the Phone Number',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
+      return;
+    }
+    if (body.phoneNumber.length !== 10) {
+      Toast.show({
+        type: 'error',
+        text1: 'Phone Number should have 10-digits',
+        // text2: 'Phone Number should have 10 Digits',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
+      return;
+    }
+    if (!vehicleType) {
+      Toast.show({
+        type: 'error',
+        text1: 'Please Select a vehicle Type',
+        // text2: 'Phone Number should have 10 Digits',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
+      return;
+    }
+    if (scannedCodes.length < 2 || scannedCodes.length > 3) {
+      Toast.show({
+        type: 'error',
+        text1: 'You Need to provide only 2 or 3 Scanners',
+        // text2: 'Phone Number should have 10 Digits',
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
+      return;
+    }
     try {
       const response = await api.post('/QR/create-temp-id', body, {
         headers: {
@@ -61,8 +98,7 @@ const UserForm = ({scannedCodes}) => {
           selectedValue={vehicleType}
           onValueChange={(itemValue, itemIndex) => setVehicleType(itemValue)}
           style={styles.picker}
-          mode="dropdown" // You can also use 'dialog' on Android
-        >
+          mode="dropdown">
           <Picker.Item label="Select an option..." value="" />
           <Picker.Item label="Two Wheeler" value="TWO_WHEELER" />
           <Picker.Item label="Three Wheeler" value="THREE_WHEELER" />
@@ -72,12 +108,13 @@ const UserForm = ({scannedCodes}) => {
       </View>
       <Input
         placeholder="Phone Number"
-        leftIcon={{type: 'font-awesome', name: 'phone', color: 'black'}}
+        leftIcon={{type: 'font-awesome', name: 'phone', color: '#7f8c8d'}}
         value={phoneNumber}
         onChangeText={setPhoneNumber}
         keyboardType="phone-pad"
         inputStyle={styles.inputText}
         inputContainerStyle={styles.inputContainer}
+        containerStyle={styles.inputWrapper}
       />
       <Button
         title="Create Temp ID"
@@ -91,34 +128,52 @@ const UserForm = ({scannedCodes}) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    backgroundColor: '#f5f5f5',
   },
   inputText: {
-    color: 'black',
+    color: THEME_COLOR,
   },
   inputContainer: {
-    borderBottomColor: 'black',
+    borderBottomColor: '#bdc3c7',
+  },
+  inputWrapper: {
+    // marginBottom: 20,
+    // backgroundColor: '#ffffff',
+    // borderRadius: 10,
+    // paddingHorizontal: 10,
+    // paddingVertical: 5,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 2},
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
+    // elevation: 3,
   },
   button: {
-    backgroundColor: 'black',
-    marginTop: 20,
+    backgroundColor: THEME_COLOR,
+    paddingVertical: 15,
+    borderRadius: 10,
   },
   buttonText: {
-    color: 'white',
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   pickerContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 20,
-    marginVertical: 10,
+    marginBottom: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   picker: {
     width: '100%',
     height: 44,
-    backgroundColor: '#FFF',
-    borderColor: 'black',
-    borderWidth: 1,
+    color: THEME_COLOR,
   },
 });
 

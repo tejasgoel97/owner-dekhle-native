@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
-import axios from "axios";
-import api from "../services/api";
-import { useSelector } from "react-redux";
+import React, {useState, useEffect} from 'react';
+import {View, Text, FlatList, StyleSheet} from 'react-native';
+import api from '../services/api';
+import {useSelector} from 'react-redux';
+import LoadingIndicator from '../components/LoadingIndicator';
+import {THEME_COLOR, THEME_COLOR_2} from '../assets/colors/colors';
 
 const MyPointsScreen = () => {
   const [transactions, setTransactions] = useState([]);
   const [totalPoints, setTotalPoints] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const token = useSelector((state) => state.userInfo.token); // Accessing token from Redux state
+  const token = useSelector(state => state.userInfo.token);
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await api.get("/mydata/myPoints", {
+        const response = await api.get('/mydata/myPoints', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -22,30 +23,29 @@ const MyPointsScreen = () => {
         setTransactions(response.data.transactions);
         setTotalPoints(response.data.totalPoints);
       } catch (error) {
-        console.error("Failed to fetch transactions:", error);
-        // Handle errors, such as by showing a notification to the user
+        console.error('Failed to fetch transactions:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchTransactions();
-  }, []);
+  }, [token]);
 
-  const renderTransactionItem = ({ item }) => (
+  const renderTransactionItem = ({item}) => (
     <View style={styles.transactionItem}>
       <View style={styles.dateAmountContainer}>
         <Text style={styles.dateText}>
           {new Date(item.transactionDate).toLocaleString()}
         </Text>
         <Text
-          style={
-            item.transactionType === "ADDED"
+          style={[
+            styles.amountText,
+            item.transactionType === 'ADDED'
               ? styles.amountAdded
-              : styles.amountRemoved
-          }
-        >
-          {item.transactionType === "ADDED"
+              : styles.amountRemoved,
+          ]}>
+          {item.transactionType === 'ADDED'
             ? `+${item.amount}`
             : `-${item.amount}`}
         </Text>
@@ -55,16 +55,15 @@ const MyPointsScreen = () => {
   );
 
   if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
-    );
+    return <LoadingIndicator />;
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.totalPoints}>Total Points: {totalPoints}</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.totalPoints}>Total Points</Text>
+        <Text style={styles.totalPointsValue}>{totalPoints}</Text>
+      </View>
       <FlatList
         data={transactions}
         keyExtractor={(item, index) => index.toString()}
@@ -77,45 +76,61 @@ const MyPointsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: THEME_COLOR,
     padding: 10,
+  },
+  headerContainer: {
+    backgroundColor: THEME_COLOR_2,
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+    alignItems: 'center',
   },
   totalPoints: {
     fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
+    color: '#FFF',
+    fontWeight: 'bold',
+  },
+  totalPointsValue: {
+    fontSize: 32,
+    color: '#FFF',
+    fontWeight: 'bold',
+    marginTop: 10,
   },
   transactionItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    flexDirection: "column",
-    justifyContent: "space-between",
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   dateAmountContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 5,
   },
   dateText: {
     fontSize: 16,
-    color: "blue",
-    flex: 1, // Ensure text does not overflow
+    color: '#333',
+  },
+  amountText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   amountAdded: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "green",
-    marginLeft: 10, // Ensure some spacing between the date and amount
+    color: '#2ECC71',
   },
   amountRemoved: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "red",
-    marginLeft: 10,
+    color: '#E74C3C',
   },
   commentsText: {
-    fontStyle: "italic",
-    color: "#666",
-    paddingTop: 5,
+    fontSize: 14,
+    color: '#888',
+    fontStyle: 'italic',
   },
 });
 

@@ -7,6 +7,8 @@ import {useDispatch} from 'react-redux';
 import {setUserInfo} from '../store/actions';
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Image} from '@rneui/base';
+import {THEME_COLOR} from '../assets/colors/colors';
 
 const LoginScreen = ({navigation}) => {
   const [username, setUsername] = useState('');
@@ -66,6 +68,13 @@ const LoginScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../assets/logo.png')} // Path to your local logo image
+          style={styles.logo}
+        />
+      </View>
+
       <View>
         <Text>Enter your Email/Password</Text>
         <Input
@@ -88,6 +97,7 @@ const LoginScreen = ({navigation}) => {
           title="Login"
           onPress={handleLogin}
           loading={loading} // Use the loading state for the spinner
+          buttonStyle={{backgroundColor: THEME_COLOR}}
         />
       </View>
 
@@ -101,14 +111,23 @@ const LoginScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     padding: 10,
   },
   registerText: {
     fontSize: 16,
     marginTop: 20,
     textAlign: 'center',
-    color: 'blue',
+    color: THEME_COLOR,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    alignSelf: 'center',
+    marginBottom: 20,
   },
 });
 

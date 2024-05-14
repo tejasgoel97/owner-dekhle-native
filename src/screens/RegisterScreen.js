@@ -14,6 +14,7 @@ import Toast from 'react-native-toast-message';
 import {useDispatch} from 'react-redux';
 import {setUserInfo} from '../store/actions';
 import api from '../services/api';
+import {THEME_COLOR} from '../assets/colors/colors';
 
 const RegisterScreen = ({navigation}) => {
   const [name, setName] = useState('');
@@ -243,7 +244,6 @@ const RegisterScreen = ({navigation}) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text h4>Register</Text>
         <Text style={{marginLeft: 10}}>Name</Text>
         <Input
           placeholder="Name"
@@ -346,7 +346,7 @@ const RegisterScreen = ({navigation}) => {
           <Button
             title={isVerified ? 'Verified' : 'Verify'}
             onPress={verifyDealer}
-            buttonStyle={isVerified ? styles.verifiedButton : {}}
+            buttonStyle={styles.button}
             disabled={isVerified}
             loading={loadingVerify}
           />
@@ -369,12 +369,14 @@ const RegisterScreen = ({navigation}) => {
             title="Verify OTP"
             onPress={HandleVerifyOTP}
             loading={loadingVerifyOTP}
+            buttonStyle={styles.button}
           />
         ) : (
           <Button
             title="Send OTP"
             onPress={handleOTPSend}
             loading={loadingSendOTP}
+            buttonStyle={styles.button}
           />
         )}
       </ScrollView>
@@ -393,8 +395,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  verifiedButton: {
-    backgroundColor: 'green',
+  button: {
+    backgroundColor: THEME_COLOR,
   },
   dealerNameText: {
     paddingBottom: 10,
