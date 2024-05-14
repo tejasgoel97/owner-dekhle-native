@@ -52,7 +52,7 @@ const TempIDScreen = ({route, navigation}) => {
   const shareLink = async () => {
     try {
       await Share.share({
-        message: `Please complete the form: http://192.168.1.5:3000/form/${tempId}`,
+        message: `http://ownerdekhle.com/form/${tempId}`,
       });
     } catch (error) {
       Toast.show({

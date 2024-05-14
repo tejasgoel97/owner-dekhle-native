@@ -47,15 +47,15 @@ const CreateQRScreen = () => {
       </View>
     );
   }
-  if (!registrationPaid) {
-    return (
-      <View style={styles.container}>
-        <Text h4>
-          Please verify your account by Admin before making the scanners
-        </Text>
-      </View>
-    );
-  }
+  // if (!registrationPaid) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <Text h4>
+  //         Please verify your account by Admin before making the scanners
+  //       </Text>
+  //     </View>
+  //   );
+  // }
 
   if (+totalPoints < -600) {
     return (

@@ -14,6 +14,8 @@ const UserForm = ({scannedCodes}) => {
   const navigation = useNavigation(); // Get navigation object using hook
   const token = useSelector(state => state.userInfo.token); // Accessing token from Redux state
 
+  console.log({vehicleType});
+
   const handleCreateTempId = async () => {
     // Logic to create a temporary ID can be simulated here
     const tempId = 'TID123'; // Example temporary ID
@@ -23,6 +25,7 @@ const UserForm = ({scannedCodes}) => {
     const body = {
       phoneNumber: phoneNumber,
       QRIDS: scannedCodes,
+      vehicleType: vehicleType,
     };
     try {
       const response = await api.post('/QR/create-temp-id', body, {
@@ -61,12 +64,12 @@ const UserForm = ({scannedCodes}) => {
           mode="dropdown" // You can also use 'dialog' on Android
         >
           <Picker.Item label="Select an option..." value="" />
-          <Picker.Item label="Two Wheeler" value="Two Wheeler" />
-          <Picker.Item label="Three Wheeler" value="Three Wheeler" />
-          <Picker.Item label="Four Wheeler" value="Four Wheeler" />
+          <Picker.Item label="Two Wheeler" value="TWO_WHEELER" />
+          <Picker.Item label="Three Wheeler" value="THREE_WHEELER" />
+          <Picker.Item label="Four Wheeler" value="FOUR_WHEELER" />
+          <Picker.Item label="Heavy Vehicle" value="HEAVY_VEHICLE" />
         </Picker>
       </View>
-
       <Input
         placeholder="Phone Number"
         leftIcon={{type: 'font-awesome', name: 'phone', color: 'black'}}
